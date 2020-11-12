@@ -7,6 +7,7 @@ Relatório
         termos](#frequência-relativa-dos-termos)
           - [Por partido](#por-partido)
           - [Por genero](#por-genero)
+          - [Capitais](#capitais)
       - [NMDS](#nmds)
 
 ``` r
@@ -301,6 +302,172 @@ genero_freq %>%
 ```
 
 <img src="visualizacoes_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+
+### Capitais
+
+``` r
+capitais <- toupper(
+  c(
+    "Rio Branco",
+    "Maceió",
+    "Macapá",
+    "Manaus",
+    "Salvador",
+    "Fortaleza",
+    "Brasília",
+    "Vitória",
+    "Goiânia",
+    "São Luís",
+    "Cuiabá",
+    "Campo Grande",
+    "Belo Horizonte",
+    "Belém",
+    "João Pessoa",
+    "Curitiba",
+    "Recife",
+    "Teresina",
+    "Rio de Janeiro",
+    "Natal",
+    "Porto Alegre",
+    "Porto Velho",
+    "Boa Vista",
+    "Florianópolis",
+    "São Paulo",
+    "Aracaju",
+    "Palmas"
+  )
+)
+
+pivot_termos <- propostas2 %>% 
+  filter(nm_ue %in% capitais) %>% 
+  select(-texto_tidy) %>% 
+  pivot_longer(transparencia:dados_abertos, values_to = "qtd", names_to = "termo") %>% 
+  mutate(
+    termo = termo%>% 
+      str_replace_all("_", " ") %>% 
+      str_to_sentence() %>% 
+      str_replace("cao", "ção") %>% 
+      str_replace("en", "ên")
+  ) %>% 
+  group_by(termo, nm_ue) %>% 
+  mutate(qt_termo_capital = sum(qtd),
+         qt_candidatura = n(),
+         freq_termo = qt_termo_capital / qt_candidatura) %>% 
+  ungroup() %>% 
+  mutate(
+    grau = case_when(
+      freq_termo < 0.5 ~ "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
+      freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
+      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada pelo"
+    ) %>%
+      factor(
+        levels = c(
+          "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
+          "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
+          "1 menção ou mais para cada proposta apresentada pelo"
+        )
+      )
+  )
+
+pivot_termos_brasil <- propostas2 %>% 
+  select(-texto_tidy) %>% 
+  pivot_longer(transparencia:dados_abertos, values_to = "qtd", names_to = "termo") %>% 
+  mutate(
+    termo = termo%>% 
+      str_replace_all("_", " ") %>% 
+      str_to_sentence() %>% 
+      str_replace("cao", "ção") %>% 
+      str_replace("en", "ên")
+  ) %>% 
+  group_by(termo) %>% 
+  summarise(qt_termo_capital = sum(qtd),
+         qt_candidatura = n(),
+         freq_termo = qt_termo_capital / qt_candidatura) %>% 
+  ungroup() %>% 
+  mutate(
+    grau = case_when(
+      freq_termo < 0.5 ~ "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
+      freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
+      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada pelo"
+    ) %>%
+      factor(
+        levels = c(
+          "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
+          "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
+          "1 menção ou mais para cada proposta apresentada pelo"
+        )
+      )
+  )
+
+plot_freq_termos <- function(token) {
+    
+    pivot_termos %>% 
+      filter(termo == token) %>% 
+      mutate(nm_ue = fct_reorder(nm_ue, freq_termo),
+             termo = fct_reorder(termo, freq_termo)) %>% 
+      ggplot(aes(x = nm_ue, y = freq_termo, fill = grau)) +
+      geom_vline(aes(xintercept = nm_ue), lty = 2, color = "gray60") + 
+      geom_point(shape = 21, size = 6, alpha = .5) +
+      geom_hline(data = pivot_termos_brasil %>% filter(termo == token),
+                 aes(yintercept = freq_termo, color = "Média\nBrasil"),
+                 lty = 2,
+                 size = 1) +
+      scale_fill_manual(values = c("#FC4E07", "#E7B800", "#00AFBB"), drop=FALSE) +
+      scale_color_manual(values = "red") +
+      facet_wrap(~termo, scales = "free_x") +
+      labs(x = NULL,
+           y = NULL,
+           fill = NULL,
+           color = "Legendas:") + 
+      coord_flip() +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18),
+            legend.text = element_text(size = 13),
+            axis.text = element_text(size = 12, face = "bold"),
+            strip.text = element_text(size = 12, face = "bold"),
+            strip.background = element_blank()
+      ) + 
+      guides(fill = guide_legend(ncol = 1), 
+             color = guide_legend(title.position = "top", title.hjust = .5))
+    
+  }
+  
+```
+
+``` r
+p1 <- map(termo[1:2], plot_freq_termos) %>%
+  reduce(~ `+`(.x, .y)) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = 'top')
+
+p2 <- map(termo[3:4], plot_freq_termos) %>% 
+  reduce(~ `+`(.x, .y)) &
+  theme(legend.position = 'none')
+
+p1 / p2 + 
+  plot_annotation(title = 'Frequência relativa dos termos - por capital') & 
+  theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18, face = "bold"))
+```
+
+<img src="visualizacoes_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+
+``` r
+p3 <- map(termo[5:6], plot_freq_termos) %>%
+  reduce(~ `+`(.x, .y)) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = 'top')
+
+p4 <- map(termo[7], plot_freq_termos) %>%
+  reduce(~ `+`(.x, .y)) &
+  theme(legend.position = 'none')
+
+(p3 + p4) + 
+  plot_layout(nrow = 2) +
+  plot_annotation(title = 'Frequência relativa dos termos - por capital') & 
+  theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18, face = "bold"))
+```
+
+<img src="visualizacoes_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
 ## NMDS
 
