@@ -1,6 +1,8 @@
 # Processamento do texto
 # recebe `propostas0` prepara texto e guarda em `propostas1`
 
+source("code/propostas0_candidaturas_validas.R")
+
 propostas1 <- propostas0 %>% 
   mutate(
     
@@ -15,4 +17,4 @@ propostas1 <- propostas0 %>%
   select(-texto)
 
 # checkkpoint
-#saveRDS(propostas1, "propostas.rds")
+saveRDS(propostas1, "propostas.rds")

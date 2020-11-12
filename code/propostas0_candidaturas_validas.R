@@ -1,9 +1,15 @@
+
+
+# recebe `propostass.csv` e retorna `propostas0`
 # `propostas0` contem somente as candidaturas válidas 
+
+
 
 # raw data ---------------------------------------------------------------------
 
 library(tidyverse)
-propostas <- read_csv("propostass.csv") %>% filter(!is.na(sg_partido))
+
+propostas <- read_csv("../raw_data/propostass.csv") %>% filter(!is.na(sg_partido))
 
 # filter candidaturas ----------------------------------------------------------
 
@@ -35,3 +41,4 @@ propostas %>% filter(url_proposta != "[]" & is.na(texto)) %>% count()
 
 # e também queremos somente candidaturas válidas
 propostas %>% count(ds_detalhe_situacao_cand, ds_situacao_candidatura, sort = T)
+

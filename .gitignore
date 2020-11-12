@@ -3,3 +3,4 @@
 .RData
 .Ruserdata
 raw_data/propostass.csv
+load_data/propostas1.rds
