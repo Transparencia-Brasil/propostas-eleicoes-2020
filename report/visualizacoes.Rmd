@@ -60,7 +60,8 @@ propostas1 %>%
 ## Prevalência dos termos
 
 ```{r}
-propostas2 %>% 
+
+termos_resumo <- propostas2 %>% 
   select(-texto_tidy) %>% 
   pivot_longer(-c(index:nm_urna_candidato), names_to = "termo", values_to = "qtd_mencoes") %>% 
   group_by(termo) %>% 
@@ -72,14 +73,21 @@ propostas2 %>%
       str_to_sentence() %>% 
       str_replace("cao", "ção") %>% 
       str_replace("en", "ên") %>% 
-      fct_reorder(qtd_mencoes)
-  ) %>% 
+      fct_reorder(qtd_mencoes),
+   per = qtd_mencoes / sum(qtd_mencoes)
+
+  ) 
+
+lbl <- paste0(format(termos_resumo$qtd_mencoes, decimal.mark = ",", big.mark = ".", justify = "centre"),
+               " (",  scales::percent(termos_resumo$per, justify = "centre", accuracy = 1), ")")
+
+termos_resumo %>% 
   ggplot(aes(x = termo, y = qtd_mencoes)) + 
-  geom_col() + 
-  geom_text(aes(label = format(qtd_mencoes, big.mark = ".", decimal = ",")), hjust = -.2) +
+  geom_col(fill = "#00AFBB", color = "black") + 
+  geom_text(aes(label = lbl), hjust = -.1) +
   scale_y_continuous(breaks = seq(0,30000, 10000),
                      labels = format(seq(0,30000, 10000), decimal.mark = ",", big.mark = "."),
-                     limits = c(0, 40000)) +
+                     limits = c(0, 50000)) +
   coord_flip() +
   labs(x = NULL, y = NULL, title = "Quantidade de menções de cada termo em todas as candidaturas") +
   theme_bw() + 
@@ -124,8 +132,6 @@ pivot_termos <- propostas2 %>%
 
 termo <- pivot_termos %>% distinct(termo) %>% pull()
 
-
-
 plot_freq_termos <- function(token) {
   
   pivot_termos %>% 
@@ -166,7 +172,7 @@ p2 <- map(termo[3:4], plot_freq_termos) %>%
   theme(legend.position = 'none')
 
 p1 / p2 + 
-  plot_annotation(title = 'Frequência relativa dos termos, por partido') & 
+  plot_annotation(title = 'Frequência relativa dos termos - por partido') & 
   theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18, face = "bold"))
 ```
 
@@ -182,7 +188,7 @@ p4 <- map(termo[7], plot_freq_termos) %>%
 
 (p3 + p4) + 
   plot_layout(nrow = 2) +
-  plot_annotation(title = 'Frequência relativa dos termos, por partido') & 
+  plot_annotation(title = 'Frequência relativa dos termos - por partido') & 
   theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18, face = "bold"))
 ```
 
@@ -272,7 +278,7 @@ genero_freq %>%
   geom_hline(aes(yintercept = termo), lty = 2, color = "gray60") +
   # geom_vline(aes(xintercept = .5), color = "gray60") +
   geom_point(aes(x = freq_mencoes_termo, color = "Média")) +
-  geom_point(aes(fill = ds_genero), shape = 21, alpha = .5, size = 8) +
+  geom_point(aes(fill = ds_genero), shape = 21, alpha = .6, size = 8) +
   scale_color_manual(values = c("Média" = "black")) +
   scale_x_continuous(breaks = c(0, .5,  2),
                      labels = c(
@@ -296,7 +302,8 @@ genero_freq %>%
         plot.title = element_text(size = 18),
         legend.justification = c(0,1),
         axis.text.y = element_text(size = 13),
-        axis.text.x = element_text(size = 12))
+        axis.text.x = element_text(size = 12)) +
+  guides(color = guide_legend(label.vjust = .2), fill = guide_legend(reverse = T))
 ```
 
 ### Capitais

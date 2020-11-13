@@ -20,6 +20,13 @@ colunas <- c(
   "dados_abertos"
 )
 
+
+# define a semente para reproduzir resultado
+# escolhe um valor aleatoreamente
+# s <- sample(1:999, 1)
+# s = 120 ajustou bem
+set.seed(120)
+
 # PARTIDOS =====================================================================
 {
   # . Matriz input -------------------------------------------------------------
@@ -176,7 +183,7 @@ colunas <- c(
     #labs
     x_lbl <- rlang::as_name(d1) %>% str_extract("\\d")
     y_lbl <- rlang::as_name(d2) %>% str_extract("\\d")
-    size_lbl <- c("1 a 5", "1 a 10", "11 a 30", "31 a 60",   "61 a 100", ">100")
+    size_lbl <- c("1 a 5", "6 a 10", "11 a 30", "31 a 60",   "61 a 100", ">100")
     
     ggplot() +
       geom_jitter(data = candidatos_grp,
@@ -230,15 +237,18 @@ colunas <- c(
         title = "Análise NMDS:\nsimilaridade de partidos em torno do tema \"transparência\"",
         size = "Quantidade de\ncandidaturas\nna posição:",
         x = paste("Dimensão", x_lbl),
-        y = paste("Dimensão", y_lbl)
+        y = paste("Dimensão", y_lbl),
+        #subtitle = paste("SEED:", s),
+        caption = "stress-value=0"
       ) +
       theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18),
-            axis.title = element_text(hjust = 1, size = 10),
+            axis.title = element_text(size = 10),
             axis.text = element_blank(),
             panel.grid = element_blank(),
             panel.border = element_rect(fill = "transparent"),
             legend.title = element_text(hjust = .5, vjust = .5, size = 12),
-            legend.text = element_text(size = 12))
+            legend.text = element_text(size = 12),
+            plot.caption = element_text(size = 8, face = "italic"))
     
   }
 } # Processa visualização
