@@ -113,15 +113,15 @@ pivot_termos <- propostas2 %>%
   ungroup()  %>%
   mutate(
     grau = case_when(
-      freq_termo < 0.5 ~ "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
+      freq_termo < 0.5 ~ "menos de 1 menção em cada 2 propostas apresentada pelo partido",
       freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
-      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada pelo"
+      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada pelo partido"
     ) %>%
       factor(
         levels = c(
-          "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
+          "menos de 1 menção em cada 2 propostas apresentada pelo partido",
           "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
-          "1 menção ou mais para cada proposta apresentada pelo"
+          "1 menção ou mais para cada proposta apresentada pelo partido"
         )
       )
   )
@@ -363,15 +363,15 @@ pivot_termos <- propostas2 %>%
   ungroup() %>% 
   mutate(
     grau = case_when(
-      freq_termo < 0.5 ~ "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
-      freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
-      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada pelo"
+      freq_termo < 0.5 ~ "menos de 1 menção em cada 2 propostas apresentada no município",
+      freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada no município",
+      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada no município"
     ) %>%
       factor(
         levels = c(
-          "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
-          "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
-          "1 menção ou mais para cada proposta apresentada pelo"
+          "menos de 1 menção em cada 2 propostas apresentada no município",
+          "pelo menos 1 menção em cada 2 propostas apresentada no município",
+          "1 menção ou mais para cada proposta apresentada no município"
         )
       )
   )
@@ -393,15 +393,15 @@ pivot_termos_brasil <- propostas2 %>%
   ungroup() %>% 
   mutate(
     grau = case_when(
-      freq_termo < 0.5 ~ "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
-      freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
-      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada pelo"
+      freq_termo < 0.5 ~ "menos de 1 menção em cada 2 propostas apresentada no município",
+      freq_termo < 1.0 ~ "pelo menos 1 menção em cada 2 propostas apresentada no município",
+      freq_termo >= 1.0 ~ "1 menção ou mais para cada proposta apresentada no município"
     ) %>%
       factor(
         levels = c(
-          "abaixo de 1 menção em cada 2 propostas apresentada pelo partido",
-          "pelo menos 1 menção em cada 2 propostas apresentada pelo partido",
-          "1 menção ou mais para cada proposta apresentada pelo"
+          "menos de 1 menção em cada 2 propostas apresentada no município",
+          "pelo menos 1 menção em cada 2 propostas apresentada no município",
+          "1 menção ou mais para cada proposta apresentada no município"
         )
       )
   )
@@ -425,7 +425,7 @@ plot_freq_termos <- function(token) {
       labs(x = NULL,
            y = NULL,
            fill = NULL,
-           color = "Legendas:") + 
+           color = NULL) + 
       coord_flip() +
       theme_bw() +
       theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18),
