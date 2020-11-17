@@ -9,7 +9,7 @@
 
 library(tidyverse)
 
-propostas <- read_csv("../raw_data/propostass.csv") %>% filter(!is.na(sg_partido))
+propostas <- read_csv(here("raw_data", "propostass.csv")) %>% filter(!is.na(sg_partido))
 
 # filter candidaturas ----------------------------------------------------------
 

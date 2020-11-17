@@ -1,7 +1,7 @@
 
 # Recebe `propostas1`, aplica função `buscador()` e retorna `proposta2`
 
-propostas1 <- readRDS("../load_data/propostas1.rds")
+propostas1 <- readRDS(here("load_data/propostas1.rds"))
 
 buscador <- function(df) {
   
