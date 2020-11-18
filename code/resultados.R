@@ -2,7 +2,6 @@
 library(tidyverse)
 library(here)
 library(rjson)
-library(kableExtra)
 
 # sources ----------------------------------------------------------------------
 source(here("code", "propostas0_candidaturas_validas.R"))
@@ -35,7 +34,9 @@ candidatos <- function(uf, cod_municipio) {
     pivot_wider(values_fn = list) %>% 
     unnest(cols = c(seq, sqcand, n, nm, cc, nv, e, st, dvt, vap, pvap)) %>% 
     transmute(
-      sd_ue = as.integer(cod_municipio),
+      seq = seq,
+      sq_candidato = sqcand,
+      sg_ue = as.integer(cod_municipio),
       nr_candidato = as.double(n),
       nm_urna_candidato = nm,
       sg_partido = case_when(
@@ -112,3 +113,11 @@ resultados2 <- resultados %>% reduce(~ bind_rows(.x, .y))
 
 # export to csv ----------------------------------------------------------------
 write.csv2(resultados2, file = here("load_data", "resultados.csv"), row.names = F)
+
+
+readxl::read_excel("raw_data/RELATORIO_DTB_BRASIL_MUNICIPIO.xls") %>% 
+  janitor::clean_names() %>% 
+  filter(nome_municipio == "Lagoinha")
+
+read_delim("raw_data/prefeitos2020.csv", ";", escape_double = FALSE, trim_ws = TRUE) %>% 
+  filter(codibge == 3526308)
