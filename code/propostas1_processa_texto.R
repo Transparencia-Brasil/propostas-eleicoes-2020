@@ -1,7 +1,9 @@
 # Processamento do texto
 # recebe `propostas0` prepara texto e guarda em `propostas1`
+library(here)
+library(tidyverse)
 
-source("propostas0_candidaturas_validas.R")
+source(here("code", "propostas0_candidaturas_validas.R"))
 
 propostas1 <- propostas0 %>% 
   mutate(
@@ -16,5 +18,5 @@ propostas1 <- propostas0 %>%
   ) %>% 
   select(-texto)
 
-# checkkpoint (rds com 399mb)
-saveRDS(propostas1, "../load_data/propostas1.rds")
+# checkpoint (rds com 399mb)
+saveRDS(propostas1, here("load_data", "propostas1.rds"))

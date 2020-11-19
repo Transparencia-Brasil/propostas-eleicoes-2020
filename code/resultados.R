@@ -121,3 +121,7 @@ readxl::read_excel("raw_data/RELATORIO_DTB_BRASIL_MUNICIPIO.xls") %>%
 
 read_delim("raw_data/prefeitos2020.csv", ";", escape_double = FALSE, trim_ws = TRUE) %>% 
   filter(codibge == 3526308)
+
+resultados %>% 
+  rename(sg_ue = sd_ue) %>% 
+  write.csv2(file = here("load_data", "resultados.csv"), row.names = F)

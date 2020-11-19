@@ -3,21 +3,26 @@
 # recebe `propostass.csv` e retorna `propostas0`
 # `propostas0` contem somente as candidaturas válidas 
 
+library(tidyverse)
 
 
 # raw data ---------------------------------------------------------------------
-
-library(tidyverse)
-
 propostas <- read_csv(here("raw_data", "propostass.csv")) %>% filter(!is.na(sg_partido))
 
 # filter candidaturas ----------------------------------------------------------
-
 candidaturas_validas <- c("DEFERIDO", "AGUARDANDO JULGAMENTO", "DEFERIDO COM RECURSO")
+
+# UPDATE: candidaturas deferidas após a nossa coleta de dados:
+deferidos_expost <- c("170000818682", "250001156020", "250000663708")
 
 propostas0 <- propostas %>%
   filter(!is.na(texto)) %>%
   filter(ds_detalhe_situacao_cand %in% candidaturas_validas) %>% 
+  bind_rows(
+    
+    propostas %>% filter(sq_candidato %in% deferidos_expost)
+    
+  ) %>% 
   select(index,
          sg_uf,
          nm_ue, #=nm_municipio
