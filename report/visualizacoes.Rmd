@@ -31,16 +31,6 @@ library(patchwork)
 ```{r}
 source(here("code/propostas0_candidaturas_validas.R"))
 source(here("code/propostas2_aplica_buscador.R"))
-
-dupl3 <- c(232917, 162593)
-dupl2 <- c(292742, 228175, 105382)
-
-propostas2 <- propostas2 %>% 
-    mutate(
-      across(transparencia:dados_abertos, ~ ifelse(index %in% dupl3, round(. / 3, 0), .)),
-      across(transparencia:dados_abertos, ~ ifelse(index %in% dupl2, round(. / 2, 0), .))
-    )
-
 ```
 
 # Total de candidaturas por UF
@@ -534,8 +524,7 @@ res_2t_ <- pr %>%
   mutate(proposta = ifelse(is.na(nm_ue), "Não apresentou\nproposta\nde governo", "Apresentou\nproposta\nde governo")) %>% 
   arrange(sg_ue) %>% 
   fill(nm_ue) %>% 
-  arrange(sg_ue, pos) %>% 
-  print(n = Inf)
+  arrange(sg_ue, pos)
 
 # res_2t_ %>% 
 #   googlesheets4::write_sheet(ss = "1uH61t_mkKU-a5FySNRRqWe58Goqrif4pkqmlfaL9FYc", sheet = "2º turno")

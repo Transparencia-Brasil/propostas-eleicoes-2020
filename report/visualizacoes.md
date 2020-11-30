@@ -34,15 +34,6 @@ library(patchwork)
 ``` r
 source(here("code/propostas0_candidaturas_validas.R"))
 source(here("code/propostas2_aplica_buscador.R"))
-
-dupl3 <- c(232917, 162593)
-dupl2 <- c(292742, 228175, 105382)
-
-propostas2 <- propostas2 %>% 
-    mutate(
-      across(transparencia:dados_abertos, ~ ifelse(index %in% dupl3, round(. / 3, 0), .)),
-      across(transparencia:dados_abertos, ~ ifelse(index %in% dupl2, round(. / 2, 0), .))
-    )
 ```
 
 # Total de candidaturas por UF
@@ -550,127 +541,7 @@ res_2t_ <- pr %>%
   mutate(proposta = ifelse(is.na(nm_ue), "Não apresentou\nproposta\nde governo", "Apresentou\nproposta\nde governo")) %>% 
   arrange(sg_ue) %>% 
   fill(nm_ue) %>% 
-  arrange(sg_ue, pos) %>% 
-  print(n = Inf)
-#> # A tibble: 114 x 9
-#>     sg_ue nm_ue nm_urna_candida~ qt_votos_candid~ qt_votos_comput~
-#>     <dbl> <chr> <chr>                       <dbl>            <dbl>
-#>   1    35 PORT~ HILDON CHAVES               74728           219749
-#>   2    35 PORT~ CRISTIANE LOPES             31461           219749
-#>   3  1392 RIO ~ TIÃO BOCALOM                87987           177462
-#>   4  1392 RIO ~ SOCORRO NERI                40250           177462
-#>   5  2550 MANA~ AMAZONINO MENDES           234088           979014
-#>   6  2550 MANA~ DAVID ALMEIDA              218929           979014
-#>   7  3018 BOA ~ ARTHUR HENRIQUE             78425           157985
-#>   8  3018 BOA ~ OTTACI                      16735           157985
-#>   9  4278 BELÉM EDMILSON RODRIG~           248751           726937
-#>  10  4278 BELÉM DELEGADO FEDERA~           167599           726937
-#>  11  5355 SANT~ NÉLIO AGUIAR                71594           166449
-#>  12  5355 SANT~ MARIA                       60051           166449
-#>  13  9210 SÃO ~ EDUARDO BRAIDE             193578           512030
-#>  14  9210 SÃO ~ DUARTE                     113430           512030
-#>  15 12190 TERE~ DR PESSOA                  142769           413522
-#>  16 12190 TERE~ KLEBER MONTEZUMA           110395           413522
-#>  17 13730 CAUC~ NAUMI AMORIM                69262           169229
-#>  18 13730 CAUC~ VITOR VALIM                 47171           169229
-#>  19 13897 FORT~ SARTO                      457622          1281079
-#>  20 13897 FORT~ CAPITÃO WAGNER             426803          1281079
-#>  21 20516 JOÃO~ CICERO LUCENA               75610           364851
-#>  22 20516 JOÃO~ NILVAN FERREIRA             60615           364851
-#>  23 25135 PAUL~ YVES RIBEIRO                51351           146782
-#>  24 25135 PAUL~ FRANCISCO PADIL~            38372           146782
-#>  25 25313 RECI~ JOÃO CAMPOS                233028           798791
-#>  26 25313 RECI~ MARILIA ARRAES             223248           798791
-#>  27 27855 MACE~ ALFREDO GASPAR ~           110234           381808
-#>  28 27855 MACE~ JHC                        109053           381808
-#>  29 31054 ARAC~ EDVALDO                    119681           262642
-#>  30 31054 ARAC~ DELEGADA DANIEL~            55973           262642
-#>  31 35157 FEIR~ ZÉ NETO                    119862           288467
-#>  32 35157 FEIR~ COLBERT MARTINS            110146           288467
-#>  33 39659 VITÓ~ ZÉ RAIMUNDO                 81721           171575
-#>  34 39659 VITÓ~ HERZEM GUSMÃO               78732           171575
-#>  35 43710 CONT~ MARÍLIA                    118955           284375
-#>  36 43710 CONT~ FELIPE SALIBA               52371           284375
-#>  37 45535 GOVE~ ANDRE MERLO                 49183           128506
-#>  38 45535 GOVE~ DR LUCIANO                  24823           128506
-#>  39 47333 JUIZ~ MARGARIDA SALOM~           102489           259721
-#>  40 47333 JUIZ~ WILSON REZATO               59633           259721
-#>  41 54011 UBER~ ELISA ARAÚJO                54581           150575
-#>  42 54011 UBER~ TONY CARLOS                 37625           150575
-#>  43 56251 CARI~ EUCLERIO SAMPAIO            30934           164442
-#>  44 56251 CARI~ CELIA TAVARES               23087           164442
-#>  45 56995 SERRA SERGIO VIDIGAL             100837           212453
-#>  46 56995 SERRA FABIO                       41194           212453
-#>  47 57037 VILA~ ARNALDINHO BORGO            73122           203097
-#>  48 57037 VILA~ MAX FILHO                   46523           203097
-#>  49 57053 VITÓ~ DELEGADO PAZOLI~            53014           171308
-#>  50 57053 VITÓ~ JOAO COSER                  37373           171308
-#>  51 58190 CAMP~ WLADIMIR GAROTI~           106526           248075
-#>  52 58190 CAMP~ CAIO VIANNA                 68732           248075
-#>  53 58777 PETR~ RUBENS BOMTEMPO             39093           142814
-#>  54 58777 PETR~ BERNARDO ROSSI              23923           142814
-#>  55 58971 SÃO ~ DIMAS GADELHA              117346           374213
-#>  56 58971 SÃO ~ CAPITÃO NELSON              85399           374213
-#>  57 59013 SÃO ~ DR JOÃO                     71730           222281
-#>  58 59013 SÃO ~ LEO VIEIRA                  43499           222281
-#>  59 60011 RIO ~ EDUARDO PAES               974804          2633911
-#>  60 60011 RIO ~ CRIVELLA                   576825          2633911
-#>  61 62197 BAURU SUÉLLEN ROSIM               57844           162475
-#>  62 62197 BAURU DR RAUL                     53299           162475
-#>  63 62910 CAMP~ DARIO SAADI                121932           472962
-#>  64 62910 CAMP~ RAFA ZIMBALDI              103397           472962
-#>  65 63770 DIAD~ FILIPPI                     92670           203019
-#>  66 63770 DIAD~ TAKA YAMAUCHI               31301           203019
-#>  67 64254 FRAN~ FLÁVIA LANCHA               35338           143599
-#>  68 64254 FRAN~ ALEXANDRE FERRE~            27772           143599
-#>  69 64777 GUAR~ GUTI                       261211           572221
-#>  70 64777 GUAR~ ELÓI PIETÁ                 184502           572221
-#>  71 66397 LIME~ MARIO BOTION                45248           139988
-#>  72 66397 LIME~ MURILO FELIX                31402           139988
-#>  73 66893 MAUÁ  ATILA                       70490           193234
-#>  74 66893 MAUÁ  MARCELO OLIVEIRA            38330           193234
-#>  75 67130 MOGI~ MARCUS MELO                 81555           192853
-#>  76 67130 MOGI~ CAIO CUNHA                  54591           192853
-#>  77 68756 PIRA~ BARJAS NEGRI                56760           165313
-#>  78 68756 PIRA~ LUCIANO ALMEIDA             25786           165313
-#>  79 69213 PRAI~ RAQUEL CHINI                55204           141356
-#>  80 69213 PRAI~ DANILO MORGADO              50317           141356
-#>  81 69698 RIBE~ DUARTE NOGUEIRA            115724           252286
-#>  82 69698 RIBE~ SUELY VILELA                52266           252286
-#>  83 71072 SÃO ~ BRUNO COVAS               1754013          5338786
-#>  84 71072 SÃO ~ GUILHERME BOULOS          1080736          5338786
-#>  85 71218 SÃO ~ SOLANGE FREITAS             67558           162894
-#>  86 71218 SÃO ~ KAYO AMADO                  55307           162894
-#>  87 71455 SORO~ RODRIGO MANGA              116020           294345
-#>  88 71455 SORO~ JAQUELINE COUTI~            48955           294345
-#>  89 71579 TABO~ ENGENHEIRO DANI~            46350           138688
-#>  90 71579 TABO~ APRIGIO                     44400           138688
-#>  91 71838 TAUB~ SAUD                        41201           143021
-#>  92 71838 TAUB~ LORENY                      36333           143021
-#>  93 77771 PONT~ MABEL CANTO                 61702           165556
-#>  94 77771 PONT~ PROFESSORA ELIZ~            51565           165556
-#>  95 80470 BLUM~ MÁRIO HILDEBRAN~            68222           160406
-#>  96 80470 BLUM~ JOÃO PAULO KLEI~            24957           160406
-#>  97 81795 JOIN~ DARCI DE MATOS              66838           264229
-#>  98 81795 JOIN~ ADRIANO SILVA               60728           264229
-#>  99 85898 CANO~ JAIRO JORGE                 71968           159219
-#> 100 85898 CANO~ LUIZ CARLOS BUS~            54903           159219
-#> 101 85995 CAXI~ PEPE VARGAS                 75619           221327
-#> 102 85995 CAXI~ ADILÓ                       34204           221327
-#> 103 87912 PELO~ PAULA MASCARENH~            78599           158015
-#> 104 87912 PELO~ IVAN DUARTE                 22889           158015
-#> 105 88013 PORT~ SEBASTIÃO MELO             200280           645755
-#> 106 88013 PORT~ MANUELA                    187262           645755
-#> 107 88412 SANT~ SERGIO CECCHIN              35218           132926
-#> 108 88412 SANT~ POZZOBOM                    33080           132926
-#> 109 90670 CUIA~ ABILIO                      90631           268811
-#> 110 90670 CUIA~ EMANUEL PINHEIRO            82367           268811
-#> 111 92215 ANÁP~ ROBERTO NAVES               82139           176127
-#> 112 92215 ANÁP~ ANTONIO GOMIDE              50843           176127
-#> 113 93734 GOIÂ~ MAGUITO VILELA             217194           602924
-#> 114 93734 GOIÂ~ VANDERLAN CARDO~           148739           602924
-#> # ... with 4 more variables: perc_votos_validos <dbl>, sg_partido <chr>,
-#> #   pos <dbl>, proposta <chr>
+  arrange(sg_ue, pos)
 
 # res_2t_ %>% 
 #   googlesheets4::write_sheet(ss = "1uH61t_mkKU-a5FySNRRqWe58Goqrif4pkqmlfaL9FYc", sheet = "2º turno")

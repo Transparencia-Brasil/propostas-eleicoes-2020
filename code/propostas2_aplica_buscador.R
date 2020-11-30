@@ -24,3 +24,13 @@ buscador <- function(df) {
 }
 
 propostas2 <- buscador(propostas1)
+
+# remove algumas propostas duplicadas:
+dupl3 <- c(232917, 162593)
+dupl2 <- c(292742, 228175, 105382)
+
+propostas2 <- propostas2 %>% 
+  mutate(
+    across(transparencia:dados_abertos, ~ ifelse(index %in% dupl3, round(. / 3, 0), .)),
+    across(transparencia:dados_abertos, ~ ifelse(index %in% dupl2, round(. / 2, 0), .))
+  )
