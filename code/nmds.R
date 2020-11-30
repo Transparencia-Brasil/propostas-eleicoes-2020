@@ -5,9 +5,8 @@ library(tidyverse)
 library(vegan)
 library(ggrepel)
 
-setwd("report/")
-source("../code/propostas0_candidaturas_validas.R")
-source("../code/propostas2_aplica_buscador.R")
+source(here("code", "propostas0_candidaturas_validas.R"))
+source(here("code", "propostas2_aplica_buscador.R"))
 
 
 colunas <- c(
@@ -25,7 +24,7 @@ colunas <- c(
 # escolhe um valor aleatoreamente
 # s <- sample(1:999, 1)
 # s = 120 ajustou bem
-set.seed(120)
+set.seed(10)
 
 # PARTIDOS =====================================================================
 {

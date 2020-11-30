@@ -16,7 +16,7 @@ buscador <- function(df) {
       #inteligencia_artificial = str_count(texto_tidy, "inteligencia artificial"),
       acesso_a_informacao = str_count(texto_tidy, "acesso a informacao"),
       controle_social = str_count(texto_tidy, "controle social"),
-      dados_abertos = str_count(texto_tidy, "dados* abertos*|abertura d..* dados*")
+      dados_abertos = str_count(texto_tidy, "dados* abertos*|abertura d..? dados?")
       
     )
   

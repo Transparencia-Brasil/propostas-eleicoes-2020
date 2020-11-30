@@ -26,7 +26,7 @@ source(here("code", "propostas2_aplica_buscador.R"))
 source(here("code", "propostas0_candidaturas_validas.R"))
 
 # propostas + resultados -------------------------------------------------------
-sg_ue <- propostas %>% select(index, sg_ue, sq_candidato)
+sg_ue <- propostas %>% select(index, sg_ue, sq_candidato, url_proposta)
 
 pr <- propostas2 %>% 
   left_join(sg_ue) %>%
@@ -46,17 +46,18 @@ res_2t <- resultados %>%
 # apresentação de propostas ----------------------------------------------------
 res_2t_ <- pr %>% 
   filter(ds_situacao == "2º turno") %>% 
-  select(sg_ue, nm_ue, nm_urna_candidato, qt_votos_candidato, qt_votos_computados) %>%
+  select(sg_ue, nm_ue, nm_urna_candidato, qt_votos_candidato, qt_votos_computados, url_proposta) %>%
   mutate(perc_votos_validos = qt_votos_candidato / qt_votos_computados) %>% 
   full_join(res_2t) %>%
   mutate(proposta = ifelse(is.na(nm_ue), "Não apresentou\nproposta\nde governo", "Apresentou\nproposta\nde governo")) %>% 
   arrange(sg_ue) %>% 
   fill(nm_ue) %>% 
   arrange(sg_ue, pos) %>% 
+  select(sg_ue:qt_votos_candidato, perc_votos_validos:proposta, url_proposta) %>% 
   print(n = Inf)
 
 # res_2t_ %>% 
-#   googlesheets4::write_sheet(ss = "1uH61t_mkKU-a5FySNRRqWe58Goqrif4pkqmlfaL9FYc", sheet = "2º turno")
+#   googlesheets4::write_sheet(ss = "1uH61t_mkKU-a5FySNRRqWe58Goqrif4pkqmlfaL9FYc", sheet = "2º turno2")
 
 res_2t_  %>% 
   count(proposta) %>% 
@@ -88,9 +89,16 @@ colunas <- c(
   "dados_abertos"
 )
 
+# cod cidades no 2ºT -----------------------------------------------------------
+sg_ue_2t <- pr %>% 
+  filter(ds_situacao == "2º turno") %>% 
+  distinct(sg_ue, nm_ue) %>% 
+  pull()
+
 # uso dos termos: situação -----------------------------------------------------
 situacao_freq <- pr %>%
-  select(index:ds_situacao, -texto_tidy) %>% 
+  select(index:ds_situacao, -texto_tidy) %>%
+  filter(sg_ue %in% sg_ue_2t) %>% 
   pivot_longer(col = all_of(colunas), names_to = "termo", values_to = "qt_mencoes") %>%
   filter(!is.na(ds_situacao)) %>% 
   mutate(
@@ -129,7 +137,7 @@ situacao_freq %>%
     color = NULL,
     x = NULL,
     y = NULL,
-    title = "Frequência relativa dos termos - por situação"
+    title = "Frequência relativa dos termos\nnos municípios onde haverá 2º turno"
   )+
   theme_bw() +
   theme(legend.position = "top",
@@ -404,3 +412,28 @@ plot_freq_termos <- function(token) {
 }
 
 plot_freq_termos("Transparência")
+
+
+pr %>%
+  select(-texto_tidy) %>% 
+  filter(sg_ue %in% sg_ue_2t) %>% 
+  filter(
+    across(c(transparencia:controle_social), ~ . == 0)
+  ) %>%
+  filter(dados_abertos != 0) %>% 
+  filter(ds_situacao == "2º turno") %>% 
+  left_join(
+    propostas %>% select(sq_candidato, url_proposta)
+  ) %>% 
+  googlesheets4::write_sheet(ss = "19d00xCoB0qxmUSiVKG5Au82vifdVoRq09X0X0Z-QSFs", sheet = "somente dados abertos")
+
+
+library(magrittr)
+propostas2 %>% 
+  filter(str_detect(texto_tidy, "abertura d..* dados*"))
+
+propostas2 %>% 
+  filter(str_detect(texto_tidy,  "dados* abertos*|abertura d..* dados*"))
+
+(1566/15731)*100
+ (138/15731)*100
