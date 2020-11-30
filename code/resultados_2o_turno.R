@@ -8,11 +8,11 @@ source(here("code", "propostas0_candidaturas_validas.R"))
 source(here("code", "propostas2_aplica_buscador.R"))
 
 # Monta url do json, faz a query, retorna lista -------------------------------- 
-pega_json <- function(uf, cod_municipio) {
+pega_json_2t <- function(uf, cod_municipio) {
   
   uf <- tolower(uf)
   
-  "https://resultados.tse.jus.br/oficial/ele2020/divulgacao/oficial/426/dados-simplificados/%s/%s%s-c0011-e000426-r.json" %>% 
+  "https://resultados.tse.jus.br/oficial/ele2020/divulgacao/oficial/427/dados-simplificados/%s/%s%s-c0011-e000427-r.json" %>% 
     sprintf(uf, uf, cod_municipio) %>% 
     readLines(warn = FALSE) %>%
     paste(collapse = "") %>% 
@@ -23,10 +23,7 @@ pega_json <- function(uf, cod_municipio) {
 #  organiza resultados por município -------------------------------------------
 candidatos <- function(uf, cod_municipio) {
   
-  
-  
-  # dados dos candidatos:
-  p1 <- pega_json(uf, cod_municipio) %>% 
+  p1 <- pega_json_2t(uf, cod_municipio) %>% 
     pluck("cand") %>%
     flatten() %>% 
     enframe() %>% 
@@ -50,10 +47,10 @@ candidatos <- function(uf, cod_municipio) {
         str_squish() %>% 
         str_replace(",", ".") %>% 
         as.numeric()
-    ) 
+    )
   
   # dados das eleições:
-  p2 <- pega_json(uf, cod_municipio) %>% 
+  p2 <- pega_json_2t(uf, cod_municipio) %>% 
     enframe() %>% 
     filter(name != "cand") %>% 
     unnest(value) %>% 
@@ -102,26 +99,24 @@ candidatos <- function(uf, cod_municipio) {
   
 }
 
-# Looping time ! ---------------------------------------------------------------
-localidades <- propostas %>%
-  distinct(sg_uf, sg_ue) %>% 
-  arrange(sg_uf, sg_ue) %>% 
-  filter(sg_ue != "66273") # lagoinha não subiu os dados https://resultados.tse.jus.br/oficial/#/eleicao;e=e426;uf=sp;mu=66273/resultados
 
-resultados <- map2(localidades$sg_uf, localidades$sg_ue, ~ candidatos(.x, .y))
+# Looping time ! ---------------------------------------------------------------
+
+# iterações serão feitas nas cidades onde houve 2º turno
+sg_ue_2t <- data.table::fread(here("load_data/resultados.csv")) %>%
+  filter(ds_situacao == "2º turno") %>% 
+  distinct(sg_ue) %>% 
+  pull()
+
+localidades_2t <- propostas %>% select(sg_ue, sg_uf) %>%
+  filter(as.integer(sg_ue) %in% sg_ue_2t) %>% 
+  distinct()
+
+resultados <- map2(localidades_2t$sg_uf, localidades_2t$sg_ue, ~ candidatos(.x, .y))
 resultados2 <- resultados %>% reduce(~ bind_rows(.x, .y))
 
 # export to csv ----------------------------------------------------------------
-write.csv2(resultados2, file = here("load_data", "resultados.csv"), row.names = F)
+write.csv2(resultados2, file = here("load_data", "resultados_2o_turno.csv"), row.names = F)
 
-
-readxl::read_excel("raw_data/RELATORIO_DTB_BRASIL_MUNICIPIO.xls") %>% 
-  janitor::clean_names() %>% 
-  filter(nome_municipio == "Lagoinha")
-
-read_delim("raw_data/prefeitos2020.csv", ";", escape_double = FALSE, trim_ws = TRUE) %>% 
-  filter(codibge == 3526308)
-
-resultados %>% 
-  rename(sg_ue = sd_ue) %>% 
-  write.csv2(file = here("load_data", "resultados.csv"), row.names = F)
+data.table::fread(here("load_data", "resultados_2o_turno.csv")) %>% 
+  as_tibble()
