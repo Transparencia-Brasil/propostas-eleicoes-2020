@@ -1,0 +1,319 @@
+---
+title: "Relatório"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = T,
+  comment = "#>",
+  message = F,
+  warning = F,
+  echo = T,
+  fig.align="center"
+)
+```
+
+
+
+## Leitura de dados
+
+### Bibliotecas
+
+```{r}
+library(tidyverse)
+library(here)
+library(patchwork)
+```
+
+### Prefeitos eleitos
+
+```{r}
+# arquivos com resultados eleitorais
+here("load_data") %>% list.files(pattern = "resultados")
+```
+
+
+<details>
+  <summary>
+  Clique para ver código de carregamento da base
+  </summary>
+    
+```{r}
+# seleciona arquivos com resultados 1º e 2º turno
+eleitos_plans <- here("load_data") %>% list.files(pattern = "resultados", full.names = T)
+
+# abre e combina os datasets
+base_candidatos <- eleitos_plans %>% 
+  map(data.table::fread) %>%
+  reduce(bind_rows) %>% 
+  as_tibble()
+
+eleitos <- base_candidatos %>% filter(ds_situacao == "Eleito")
+
+glimpse(eleitos)
+```
+
+</details>
+
+### Propostas eleitorais eleitas
+
+<details>
+  <summary>
+  Clique para ver código de carregamento da base
+  </summary>
+
+```{r}
+# carrega as propostas eleitorais
+source(here("code/propostas0_candidaturas_validas.R"))
+source(here("code/propostas2_aplica_buscador.R"))
+
+propostas_eleitas <- eleitos %>% left_join(propostas2, by = c("nm_urna_candidato", "sg_partido"))
+
+glimpse(propostas_eleitas)
+```
+
+</details>
+
+Faz um select simples para uma inspeção básica: 
+
+```{r}
+# consulta simples na base:
+propostas_eleitas %>% 
+  select(nm_urna_candidato,
+         sg_partido,
+         ds_situacao,
+         qt_votos_candidato,
+         pr_votos_candidato,
+         transparencia,
+         corrupcao,
+         integridade,
+         governo_aberto,
+         acesso_a_informacao,
+         controle_social,
+         dados_abertos) %>% 
+  glimpse()
+```
+
+## Gráficos
+
+### Frequência relativa de menções de cada termo entre prefeitos eleitos
+
+#### em (%)
+
+<details>
+  <summary>
+  ver código
+  </summary>
+
+```{r}
+
+termos_resumo <- function(df) {
+  
+  # set to test:
+  #df <- propostas2
+  #df <- propostas_eleitas
+  
+  cols_to_pivot <- names(propostas2)[names(propostas2) != "texto_tidy"]
+  
+  df <- df %>% 
+    select(all_of(cols_to_pivot)) %>% 
+    pivot_longer(-c(index:nm_urna_candidato), names_to = "termo", values_to = "qtd_mencoes") %>% 
+    group_by(termo) %>% 
+    summarise(qtd_mencoes = sum(qtd_mencoes, na.rm = T)) %>% 
+    ungroup() %>% 
+    mutate(
+      
+      termo = termo %>% 
+        str_replace_all("_", " ") %>% 
+        str_to_sentence() %>% 
+        str_replace("cao", "ção") %>% 
+        str_replace("en", "ên") %>% 
+        fct_reorder(qtd_mencoes),
+      per = qtd_mencoes / sum(qtd_mencoes)
+  
+    ) 
+  
+  return(df)
+  
+}
+
+
+termos_resumo_plot <- function() {
+  
+  vec_base <- c("O ponto em vermelho\né a frequência dos termos\nentre todos os candidatos",
+                "Candidatos eleitos")
+  
+  df <- list(propostas2, propostas_eleitas) %>% 
+    map(termos_resumo) %>% 
+    set_names(vec_base) %>% 
+    enframe(name = "base") %>% 
+    unnest(value)
+  
+  df %>%
+    ggplot(aes(x = termo, y = per)) +
+    geom_col(data = . %>% filter(base == vec_base[2])) +
+    geom_point(data = . %>% filter(base == vec_base[1]), aes(color = base)) +
+    coord_flip() +
+    scale_y_continuous(labels = scales::percent_format()) +
+    labs(
+      x = NULL,
+      y = NULL,
+      color = NULL
+    ) +
+    theme(legend.position = c(.7, .1))
+
+}
+
+# call plot
+#termos_resumo_plot()
+
+```
+
+</details>
+
+```{r echo = FALSE,  fig.height=4, fig.width=6}
+termos_resumo_plot()
+```
+
+> Destaques:
+>
+> Candidaturas eleitas...
+>
+> * utilizaram **mais** o termo transparência
+>
+> * utilizaram **menos** o termo  
+
+</br>
+
+### Frequência relativa dos termos - por partido
+
+<details>
+  <summary>
+  ver código
+  </summary>
+  
+```{r}
+pivot_termos <- function(df) {
+  
+  # set to test:
+  #df <- propostas2
+  #df <- propostas_eleitas
+  
+  cols_to_pivot <- names(propostas2)[names(propostas2) != "texto_tidy"]
+  
+  df <- df %>% 
+    select(all_of(cols_to_pivot)) %>% 
+    pivot_longer(transparencia:dados_abertos, values_to = "qtd", names_to = "termo") %>% 
+    mutate(
+      termo = termo%>% 
+        str_replace_all("_", " ") %>% 
+        str_to_sentence() %>% 
+        str_replace("cao", "ção") %>% 
+        str_replace("en", "ên")
+    ) %>% 
+    group_by(termo, sg_partido) %>% 
+    summarise(qt_termo_partido = sum(qtd, na.rm = T),
+           qt_candidatura = n(),
+           freq_termo = qt_termo_partido / qt_candidatura) %>% 
+    ungroup()  %>%
+    mutate(
+      
+      grau = case_when(
+          freq_termo <  0.2 ~ "até 1 em cada 5 propostas citam o termo",
+          freq_termo <  1.0 ~ "pelo menos 1 em cada 2 propostas citam o termo",
+          TRUE ~ "Todas as propostas citam o termo ao menos 1 vez"
+        ) %>%
+        factor(
+          levels = c(
+            "até 1 em cada 5 propostas citam o termo",
+            "pelo menos 1 em cada 2 propostas citam o termo",
+            "Todas as propostas citam o termo ao menos 1 vez"
+          )
+        )
+      
+    )
+
+  return(df)
+  
+}
+
+plot_freq_termos <- function(df, token) {
+  
+  # set to test:
+  #df <- propostas2
+  #df <- propostas_eleitas
+  #token <- "Transparência"
+  
+  pivot_termos(df) %>% 
+    filter(termo == token) %>% 
+    mutate(sg_partido = fct_reorder(sg_partido, freq_termo),
+           termo = fct_reorder(termo, freq_termo)) %>% 
+    ggplot(aes(x = sg_partido, y = freq_termo, fill = grau)) +
+    geom_vline(aes(xintercept = sg_partido), lty = 2, color = "gray60") + 
+    geom_point(shape = 21, size = 6, alpha = .5) +
+    scale_fill_manual(values = c("#FC4E07", "#E7B800", "#00AFBB"), drop=FALSE) +
+    facet_wrap(~termo, scales = "free_x") +
+    labs(x = NULL,
+         y = NULL,
+         fill = NULL) + 
+    coord_flip() +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18),
+          legend.text = element_text(size = 13),
+          axis.text = element_text(size = 12, face = "bold"),
+          strip.text = element_text(size = 12, face = "bold"),
+          strip.background = element_blank()
+    ) + 
+    guides(fill = guide_legend(ncol = 1))
+  
+}
+
+termo <- pivot_termos(propostas_eleitas) %>% distinct(termo) %>% pull()
+
+#test
+#plot_freq_termos(propostas_eleitas, termo[1])
+
+
+# junta os gráficos com patchwork
+p1 <- map(termo[1:2], ~ plot_freq_termos(propostas_eleitas, .x)) %>%
+  reduce(~ `+`(.x, .y)) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = 'top')
+
+p2 <- map(termo[3:4], ~ plot_freq_termos(propostas_eleitas, .x)) %>% 
+  reduce(~ `+`(.x, .y)) &
+  theme(legend.position = 'none')
+
+p3 <- p1 / p2 & theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18, face = "bold"))
+
+p4 <- map(termo[5:6], ~ plot_freq_termos(propostas_eleitas, .x)) %>%
+  reduce(~ `+`(.x, .y)) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = 'top')
+
+p5 <- map(termo[7], ~ plot_freq_termos(propostas_eleitas, .x)) %>%
+  reduce(~ `+`(.x, .y)) &
+  theme(legend.position = 'none')
+
+p6 <- (p4 + p5) + 
+  plot_layout(nrow = 2) +
+  theme(plot.title = element_text(hjust = .5, vjust = .5, size = 18, face = "bold"))
+#p3
+```
+
+</details>
+
+```{r echo = FALSE, fig.height=15, fig.width=10}
+p3
+```
+
+```{r echo = FALSE, fig.height=15, fig.width=10}
+p6
+```
+

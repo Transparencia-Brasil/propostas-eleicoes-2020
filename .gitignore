@@ -5,3 +5,4 @@
 raw_data/propostass.csv
 raw_data/RELATORIO_DTB_BRASIL_MUNICIPIO.xls
 load_data/propostas1.rds
+old/*

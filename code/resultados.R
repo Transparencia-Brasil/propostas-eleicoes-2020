@@ -105,23 +105,11 @@ candidatos <- function(uf, cod_municipio) {
 # Looping time ! ---------------------------------------------------------------
 localidades <- propostas %>%
   distinct(sg_uf, sg_ue) %>% 
-  arrange(sg_uf, sg_ue) %>% 
-  filter(sg_ue != "66273") # lagoinha não subiu os dados https://resultados.tse.jus.br/oficial/#/eleicao;e=e426;uf=sp;mu=66273/resultados
+  arrange(sg_uf, sg_ue) #%>%
+ # filter(sg_ue != "66273") # lagoinha não subiu os dados https://resultados.tse.jus.br/oficial/#/eleicao;e=e426;uf=sp;mu=66273/resultados (já foi foi corrigido)
 
 resultados <- map2(localidades$sg_uf, localidades$sg_ue, ~ candidatos(.x, .y))
 resultados2 <- resultados %>% reduce(~ bind_rows(.x, .y))
 
 # export to csv ----------------------------------------------------------------
-write.csv2(resultados2, file = here("load_data", "resultados.csv"), row.names = F)
-
-
-readxl::read_excel("raw_data/RELATORIO_DTB_BRASIL_MUNICIPIO.xls") %>% 
-  janitor::clean_names() %>% 
-  filter(nome_municipio == "Lagoinha")
-
-read_delim("raw_data/prefeitos2020.csv", ";", escape_double = FALSE, trim_ws = TRUE) %>% 
-  filter(codibge == 3526308)
-
-resultados %>% 
-  rename(sg_ue = sd_ue) %>% 
-  write.csv2(file = here("load_data", "resultados.csv"), row.names = F)
+write.csv2(resultados2, file = here("load_data/resultados2.csv"), row.names = F)

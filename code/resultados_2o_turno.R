@@ -4,8 +4,8 @@ library(here)
 library(rjson)
 
 # sources ----------------------------------------------------------------------
-source(here("code", "propostas0_candidaturas_validas.R"))
-source(here("code", "propostas2_aplica_buscador.R"))
+source(here("code/propostas0_candidaturas_validas.R"))
+source(here("code/propostas2_aplica_buscador.R"))
 
 # Monta url do json, faz a query, retorna lista -------------------------------- 
 pega_json_2t <- function(uf, cod_municipio) {
@@ -99,7 +99,6 @@ candidatos <- function(uf, cod_municipio) {
   
 }
 
-
 # Looping time ! ---------------------------------------------------------------
 
 # iterações serão feitas nas cidades onde houve 2º turno
@@ -116,7 +115,4 @@ resultados <- map2(localidades_2t$sg_uf, localidades_2t$sg_ue, ~ candidatos(.x, 
 resultados2 <- resultados %>% reduce(~ bind_rows(.x, .y))
 
 # export to csv ----------------------------------------------------------------
-write.csv2(resultados2, file = here("load_data", "resultados_2o_turno.csv"), row.names = F)
-
-data.table::fread(here("load_data", "resultados_2o_turno.csv")) %>% 
-  as_tibble()
+write.csv2(resultados2, file = here("load_data/resultados_2o_turno.csv"), row.names = F)
