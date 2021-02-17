@@ -23,7 +23,6 @@ Relatório
         turno](#frequencia-relativa-dos-termos-nas-cidades-onde-há-2º-turno)
 
 ``` r
-library(tidyverse)
 library(vegan)
 library(sf)
 library(janitor)

@@ -1,0 +1,25 @@
+{
+    "r.rterm.windows": "C:\\Users\\rauld\\anaconda3\\Scripts\\radian.exe",
+    "r.bracketedPaste": true,
+    "r.rpath.windows": "C:\\Program Files\\R\\R-4.0.3\\bin\\R.exe",
+    "r.lsp.debug": true,
+    "r.rterm.option": [
+        
+    ],
+    "r.rmarkdown.chunkBackgroundColor": "rgba(100, 165, 0, 0.1)",
+    "r.rmarkdown.codeLensCommands": [
+        "r.runCurrentChunk",
+        "r.runAboveChunks",
+        "r.selectCurrentChunk",
+        "r.runCurrentAndBelowChunks",
+        "r.runAllChunks",
+        "r.runPreviousChunk",
+        "r.runNextChunk",
+        "r.goToPreviousChunk",
+        "r.goToNextChunk"
+    ],
+    "r.alwaysUseActiveTerminal": false,
+    "r.sessionWatcher": true,
+    "r.workspaceViewer.removeHiddenItems": false,
+    "r.interpreterPath": "C:\\Users\\rauld\\anaconda3\\Scripts\\radian.exe",
+}
